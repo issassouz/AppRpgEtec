@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using AppRpgEtec.Models;
 using AppRpgEtec.Services.Usuarios;
 using System.Windows.Input;
+using AppRpgEtec.Views.Usuarios;
+using AppRpgEtec.Views.Personagens;
 
 namespace AppRpgEtec.ViewModels.Usuarios
 {
@@ -19,17 +21,22 @@ namespace AppRpgEtec.ViewModels.Usuarios
         public void InicializarCommands()
         {
             AutenticarCommand = new Command(async () => await AutenticarUsuario());
+            RegistrarCommand = new Command(async () => await RegistrarUsuario());
+            DirecionarCadastroCommand = new Command(async () => await DirecionarParaCadastro());
         }
 
         private UsuarioService uService;
         public ICommand AutenticarCommand { get; set; }
- 
+        public ICommand RegistrarCommand { get; set; }
+        public ICommand DirecionarCadastroCommand { get; set; }
+
         #region AtributoPropriedades
         private string login = string.Empty;
         private string senha = string.Empty;
 
-        public string Login 
-        {   get => login;
+        public string Login
+        {
+            get => login;
             set
             {
                 login = value;
@@ -38,8 +45,9 @@ namespace AppRpgEtec.ViewModels.Usuarios
 
         }
         public string Senha
-        {   get => senha;
-            set 
+        {
+            get => senha;
+            set
             {
                 senha = value;
                 OnPropertyChanged();
@@ -70,7 +78,7 @@ namespace AppRpgEtec.ViewModels.Usuarios
 
                     await Application.Current.MainPage.DisplayAlert("Informação", message, "Ok");
 
-                    Application.Current.MainPage = new MainPage();
+                    Application.Current.MainPage = new ListagemView();
                 }
                 else
                 {
@@ -85,7 +93,43 @@ namespace AppRpgEtec.ViewModels.Usuarios
             }
 
         }
-
         #endregion
+
+        public async Task RegistrarUsuario()
+        {
+            try
+            {
+                Usuario u = new Usuario();
+                u.Username = Login;
+                u.PasswordString = Senha;
+
+                Usuario uRegistrado = await uService.PostResgistraUsuarioAsync(u);
+
+                if (uRegistrado.Id != 0)
+                {
+                    string mensagem = $"Usuário Id {uRegistrado.Id} registrado com sucesso";
+                    await Application.Current.MainPage.DisplayAlert("Informação", mensagem, "Ok");
+
+                    await Application.Current.MainPage.Navigation.PopAsync(); //Remove a página da pilha de vizualizção
+                }
+
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Informação", ex.Message + "Detalhes: " + ex.InnerException, "OK");
+            }
+        }
+        public async Task DirecionarParaCadastro()
+        {
+            try
+            {
+                await Application.Current.MainPage.Navigation.PushAsync(new CadastroView());
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Informação", ex.Message + "Detalhes: " + ex.InnerException, "OK");
+
+            }
+        }
     }
 }

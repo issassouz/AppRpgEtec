@@ -10,7 +10,7 @@ namespace AppRpgEtec.Services.Usuarios
     internal class UsuarioService : Request 
     {
         private readonly Request _request;
-        private const string _apiUrlBase = "isabelinha-rpg.azurewebsites.net";
+        private const string _apiUrlBase = "https://isabelinha-rpg.azurewebsites.net/Usuarios";
 
         public UsuarioService()
         {
@@ -19,7 +19,7 @@ namespace AppRpgEtec.Services.Usuarios
 
         public async Task<Usuario> PostResgistraUsuarioAsync(Usuario u)
         {
-            string urlComplementar = "/Resgistrar";
+            string urlComplementar = "/Registrar";
             u.Id = await _request.PostReturnIntAsync(_apiUrlBase + urlComplementar, u, string.Empty);
 
             return u;
