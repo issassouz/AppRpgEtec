@@ -11,8 +11,8 @@ namespace AppRpgEtec.Models
     {
         public int Id { get; set; }
         public string Nome { get; set; }
-        public string PontosVida { get; set; }
-        public string Forca { get; set; }
+        public int PontosVida { get; set; }
+        public int Forca { get; set; }
         public int Defesa { get; set; }
         public int Inteligencia { get; set; }
         public byte[] FotoPersonagem { get; set; }
