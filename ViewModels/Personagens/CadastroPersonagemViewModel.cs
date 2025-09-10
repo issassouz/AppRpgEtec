@@ -11,10 +11,12 @@ using System.Windows.Input;
 
 namespace AppRpgEtec.ViewModels.Personagens
 {
+    [QueryProperty("PersonagemSelecionado", "pId")]
     public class CadastroPersonagemViewModel : BaseViewModel
     {
         private PersonagemService pService;
         public ICommand SalvarCommand { get; }
+        public ICommand Cancelarcommand { get; set; }  
 
         public CadastroPersonagemViewModel()
         {
@@ -23,7 +25,13 @@ namespace AppRpgEtec.ViewModels.Personagens
             _ = ObterClasses();
 
             SalvarCommand = new Command(async () => { await SalvarPersonagem(); });
+            Cancelarcommand = new Command(async => CancelarCadastro());
         }        
+
+        private async void CancelarCadastro()
+        {
+            await Shell.Current.GoToAsync("..");
+        }
 
         private int id;
         private string nome;
@@ -34,6 +42,59 @@ namespace AppRpgEtec.ViewModels.Personagens
         private int disputas;
         private int vitorias;
         private int derrotas;
+
+        public async void CarregarPersonagem()
+        {
+            try
+            {
+                Personagem p = await pService.GetPersonagemAsync(int.Parse(personagemSelecionadoId));
+
+                this.Nome = p.Nome;
+                this.PontosVida = p.PontosVida;
+                this.Defesa = p.Defesa;
+                this.Derrotas = p.Derrotas;
+                this.Disputas = p.Disputas;
+                this.Forca = p.Forca;
+                this.Inteligencia = p.Inteligencia;
+                this.Vitorias = p.Vitorias;
+                this.Id = p.Id;
+
+                TipoClasseSelecionado = this.ListaTipoClasse.FirstOrDefault(tClasse => tClasse.Id == (int)p.Classe);
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Ops", ex.Message + "Detalhes: " + ex.InnerException, "Ok");
+            }
+        }
+        private string personagemSelecionadoId;
+        public string PersonagemSelecionadoId
+        {
+            set
+            {
+                if (value!= null)
+                {
+                    personagemSelecionadoId = Uri.UnescapeDataString(value);
+                    CarregarPersonagem();
+                }
+            }
+        }
+
+        private Personagem personagemSelecionado;
+        public Personagem PersonagemSelecionado
+        {
+            get { return personagemSelecionado; }
+            set
+            {
+                if (value != null)
+                {
+                    personagemSelecionado = value;
+
+                    Shell.Current.GoToAsync($"cadPersonagemView?pId={personagemSelecionado.Id}");
+                }
+            }
+        }
+
+
 
         private ObservableCollection<TipoClasse> listaTipoClasse;
         public int Id
@@ -108,8 +169,10 @@ namespace AppRpgEtec.ViewModels.Personagens
                 };
                 if (model.Id == 0)
                     await pService.PostPersonagemAsync(model);
+                else
+                    await pService.PutPersonagemAsync(model);
 
-                await Application.Current.MainPage.DisplayAlert("Mensagem", "Dados salvos cm sucesso!", "Ok");
+                    await Application.Current.MainPage.DisplayAlert("Mensagem", "Dados salvos cm sucesso!", "Ok");
                 await Shell.Current.GoToAsync(".."); //Remove a página atual da pilha de páginas
             }
             catch (Exception ex)

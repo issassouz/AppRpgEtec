@@ -1,4 +1,5 @@
-﻿using AppRpgEtec.Views.Personagens;
+﻿using System.Linq.Expressions;
+using AppRpgEtec.Views.Personagens;
 
 namespace AppRpgEtec
 {
